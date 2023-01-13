@@ -1202,10 +1202,15 @@ htp_status_t htp_tx_state_response_complete(htp_tx_t *tx) {
 htp_status_t htp_tx_finalize(htp_tx_t *tx) {
     if (tx == NULL) return HTP_ERROR;
 
+    if (tx->waf_tx != NULL)
+    {
+        coraza_process_request_headers(tx->waf_tx);
+        coraza_process_logging(tx->waf_tx);
+        coraza_free_transaction(tx->waf_tx);
+        tx->waf_tx =0;
+    }
 
-    coraza_process_request_headers(tx->waf_tx);
-    coraza_process_logging(tx->waf_tx);
-    coraza_free_transaction(tx->waf_tx);
+
 
     if (!htp_tx_is_complete(tx)) return HTP_OK;
 
