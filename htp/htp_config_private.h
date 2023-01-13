@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 #define HTP_DECODER_CONTEXTS_MAX    3
+#include <coraza.h>
 
 typedef struct htp_decoder_cfg_t {
 
@@ -121,6 +122,7 @@ typedef struct htp_decoder_cfg_t {
 } htp_decoder_cfg_t;
 
 struct htp_cfg_t {
+    coraza_waf_t waf;
     /**
      * The maximum size of the buffer that is used when the current
      * input chunk does not contain all the necessary data (e.g., a very header

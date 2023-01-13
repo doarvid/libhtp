@@ -103,6 +103,13 @@ htp_tx_t *htp_tx_create(htp_connp_t *connp) {
         return NULL;
     }
 
+    tx->waf_tx = coraza_new_transaction(tx->cfg->waf, NULL);
+    if(tx == 0) {
+        htp_tx_destroy_incomplete(tx);
+        return NULL;
+    }
+    coraza_process_connection(tx->waf_tx,tx->conn->client_addr,tx->conn->client_port,
+    tx->conn->server_addr,tx->conn->server_port);
     htp_list_add(tx->conn->transactions, tx);
 
     return tx;
@@ -110,6 +117,7 @@ htp_tx_t *htp_tx_create(htp_connp_t *connp) {
 
 htp_status_t htp_tx_destroy(htp_tx_t *tx) {
     if (tx == NULL) return HTP_ERROR;
+
 
     if (!htp_tx_is_complete(tx)) return HTP_ERROR;
 
@@ -307,6 +315,8 @@ htp_status_t htp_tx_req_set_header(htp_tx_t *tx, const char *name, size_t name_l
         free(h);
         return HTP_ERROR;
     }
+    
+    coraza_add_request_header(tx->waf_tx,name,name_len,value,value_len);
 
     return HTP_OK;
 }
@@ -330,7 +340,6 @@ htp_status_t htp_tx_req_set_uri(htp_tx_t *tx, const char *uri, size_t uri_len, e
 
     tx->request_uri = copy_or_wrap_mem(uri, uri_len, alloc);
     if (tx->request_uri == NULL) return HTP_ERROR;
-
     return HTP_OK;
 }
 
@@ -340,6 +349,8 @@ htp_status_t htp_tx_req_set_protocol(htp_tx_t *tx, const char *protocol, size_t 
     tx->request_protocol = copy_or_wrap_mem(protocol, protocol_len, alloc);
     if (tx->request_protocol == NULL) return HTP_ERROR;
 
+
+    coraza_process_uri(tx->waf_tx, tx->request_uri, tx->request_method, tx->request_protocol);
     return HTP_OK;
 }
 
@@ -1190,6 +1201,11 @@ htp_status_t htp_tx_state_response_complete(htp_tx_t *tx) {
 
 htp_status_t htp_tx_finalize(htp_tx_t *tx) {
     if (tx == NULL) return HTP_ERROR;
+
+
+    coraza_process_request_headers(tx->waf_tx);
+    coraza_process_logging(tx->waf_tx);
+    coraza_free_transaction(tx->waf_tx);
 
     if (!htp_tx_is_complete(tx)) return HTP_OK;
 

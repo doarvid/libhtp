@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 #include "htp.h"
-
+#include <coraza.h>
 /**
  * Decoder contexts.
  */
@@ -415,6 +415,7 @@ void htp_config_set_convert_lowercase(htp_cfg_t *cfg, enum htp_decoder_ctx_t ctx
  */
 htp_status_t htp_config_set_extract_request_files(htp_cfg_t *cfg, int extract_files, int limit);
 
+void htp_config_set_waf(htp_cfg_t *cfg, coraza_waf_t waf);
 /**
  * Configures the maximum size of the buffer LibHTP will use when all data is not available
  * in the current buffer (e.g., a very long header line that might span several packets). This

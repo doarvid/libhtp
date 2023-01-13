@@ -61,6 +61,8 @@ extern "C" {
 #include "htp_urlencoded.h"
 #include "htp_utf8_decoder.h"
 
+#include <coraza.h>
+
 /**
  * Represents a single TCP connection.
  */
@@ -542,6 +544,7 @@ struct htp_tx_t {
 
     /** Total repetitions for headers in response. */
     uint16_t res_header_repetitions;
+    coraza_transaction_t waf_tx;
 };
 
 /**

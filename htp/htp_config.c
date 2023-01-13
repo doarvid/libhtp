@@ -164,6 +164,7 @@ htp_cfg_t *htp_config_create(void) {
     cfg->compression_bomb_limit = HTP_COMPRESSION_BOMB_LIMIT;
     cfg->compression_time_limit = HTP_COMPRESSION_TIME_LIMIT_USEC;
     cfg->allow_space_uri = 0;
+    cfg->waf = 0;
 
     // Default settings for URL-encoded data.
 
@@ -505,6 +506,11 @@ htp_status_t htp_config_set_extract_request_files(htp_cfg_t *cfg, int extract_re
     cfg->extract_request_files = extract_request_files;
     cfg->extract_request_files_limit = limit;
     return HTP_OK;
+}
+
+void htp_config_set_waf(htp_cfg_t *cfg, coraza_waf_t waf) {
+    if (cfg == NULL) return;
+    cfg->waf = waf;
 }
 
 void htp_config_set_field_limits(htp_cfg_t *cfg, size_t soft_limit, size_t hard_limit) {
